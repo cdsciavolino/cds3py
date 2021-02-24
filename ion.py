@@ -4,6 +4,7 @@ the local system.
 """
 
 import json
+import yaml
 
 
 ###############################################################################
@@ -31,6 +32,16 @@ def read_jsonl(infile, log=False):
     return read_file(infile, handler, log=log)
 
 
+def read_tsv(infile, row_fn=lambda x: x, log=False):
+    handler = lambda f: [row_fn(line.split('\t')) for line in f.readlines()]
+    return read_file(infile, handler, log=log)
+
+
+def read_yaml(infile, log=False):
+    handler = lambda f: yaml.load(f, Loader=yaml.FullLoader)
+    return read_file(infile, handler, log=log)
+
+
 ###############################################################################
 #   FILE WRITING              #################################################
 ###############################################################################
@@ -47,8 +58,15 @@ def write_file(outfile, handle_file, log=False):
 def write_json(outfile, data, log=False, pretty=False):
     handler = lambda f: f.write(json.dumps(data, indent=4 if pretty else None))
     write_file(outfile, handler, log=log)
-    
 
+
+def write_jsonl(outfile, data, log=False):
+    def _write_jsonl(f):
+        for dct in data:
+            f.write(json.dumps(dct) + '\n')
+    handler = _write_jsonl
+    write_file(outfile, handler, log=log)
+    
 """
 TODO:
 

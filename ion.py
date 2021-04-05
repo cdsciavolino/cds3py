@@ -4,18 +4,21 @@ the local system.
 """
 
 import json
-import yaml
+import random
+import yaml     # Needed to pip install pyyaml
 
 
 ###############################################################################
 #   FILE READING              #################################################
 ###############################################################################
 
-def read_file(infile, handle_file, log=False):
+def read_file(infile, handle_file, log=False, skip_first_line=False):
     if log:
         print('Opening "{}"...'.format(infile))
     data = None
     with open(infile) as f:
+        if skip_first_line:
+            f.readline()
         data = handle_file(f)
     if log:
         print('  Done.')
@@ -32,9 +35,9 @@ def read_jsonl(infile, log=False):
     return read_file(infile, handler, log=log)
 
 
-def read_tsv(infile, row_fn=lambda x: x, log=False):
+def read_tsv(infile, row_fn=lambda x: x, log=False, skip_first_line=False):
     handler = lambda f: [row_fn(line.split('\t')) for line in f.readlines()]
-    return read_file(infile, handler, log=log)
+    return read_file(infile, handler, log=log, skip_first_line=skip_first_line)
 
 
 def read_yaml(infile, log=False):
@@ -66,7 +69,15 @@ def write_jsonl(outfile, data, log=False):
             f.write(json.dumps(dct) + '\n')
     handler = _write_jsonl
     write_file(outfile, handler, log=log)
-    
+
+
+###############################################################################
+#   OTHER OUTPUT              #################################################
+###############################################################################
+def sample_print(item, pct):
+    if random.random() < (pct / 100):
+        print(item)
+
 """
 TODO:
 
